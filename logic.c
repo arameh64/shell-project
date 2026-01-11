@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -12,10 +14,6 @@
 #include <termios.h>
 #include <ctype.h>
 
-#define STDIN_FILENO  0
-#define STDOUT_FILENO 1
-#define STDERR_FILENO 2
-
 typedef enum e_token_type
 {
     TOK_WORD,
@@ -26,7 +24,6 @@ typedef enum e_token_type
     TOK_BACKGROUND
 } t_token_type;
 
-
 typedef struct s_token
 {
     t_token_type type;
@@ -34,14 +31,28 @@ typedef struct s_token
     struct s_token *next;
 } t_token;
 
+t_token *new_token(t_token_type type, char *value)
+{
+    t_token *tok = malloc(sizeof(t_token));
+    if (!tok)
+        return NULL;
 
-void add_token(t_token **head, t_token *new)
+    tok->type = type;
+    tok->value = value ? strdup(value) : NULL;
+    tok->next = NULL;
+    return tok;
+}
+
+void add_token(t_token **head, t_token *newt)
 {
     t_token *tmp;
 
+    if (!newt)
+        return;
+
     if (!*head)
     {
-        *head = new;
+        *head = newt;
         return;
     }
 
@@ -49,15 +60,14 @@ void add_token(t_token **head, t_token *new)
     while (tmp->next)
         tmp = tmp->next;
 
-    tmp->next = new;
+    tmp->next = newt;
 }
-
 
 t_token *tokenize(char *cmd)
 {
     t_token *tokens = NULL;
     int i = 0;
-    int len = strlen(cmd);
+    int len = (int)strlen(cmd);
 
     while (i < len)
     {
@@ -67,7 +77,7 @@ t_token *tokenize(char *cmd)
             continue;
         }
 
-        if (cmd[i] == '>' && cmd[i + 1] == '>')
+        if (cmd[i] == '>' && (i + 1) < len && cmd[i + 1] == '>')
         {
             add_token(&tokens, new_token(TOK_REDIR_APPEND, NULL));
             i += 2;
@@ -109,8 +119,7 @@ t_token *tokenize(char *cmd)
             }
 
             int size = i - start;
-            char *word = strndup(cmd + start, size);
-
+            char *word = strndup(cmd + start, (size_t)size);
             add_token(&tokens, new_token(TOK_WORD, word));
             free(word);
             continue;
@@ -120,14 +129,12 @@ t_token *tokenize(char *cmd)
     return tokens;
 }
 
-
 char *reader()
 {
     char *line = NULL;
     size_t len = 0;
 
     ssize_t nread = getline(&line, &len, stdin);
-
     if (nread == -1)
     {
         free(line);
@@ -138,13 +145,12 @@ char *reader()
     return line;
 }
 
-
 void print_tokens(t_token *t)
 {
     while (t)
     {
         if (t->type == TOK_WORD)
-            printf("WORD(%s)\n", t->value);
+            printf("WORD(%s)\n", t->value ? t->value : "");
         else if (t->type == TOK_PIPE)
             printf("PIPE\n");
         else if (t->type == TOK_REDIR_IN)
@@ -160,6 +166,16 @@ void print_tokens(t_token *t)
     }
 }
 
+void free_tokens(t_token *t)
+{
+    while (t)
+    {
+        t_token *n = t->next;
+        free(t->value);
+        free(t);
+        t = n;
+    }
+}
 
 int main()
 {
@@ -168,10 +184,10 @@ int main()
         return 0;
 
     t_token *toks = tokenize(raw);
-
     print_tokens(toks);
+
+    free_tokens(toks);
+    free(raw);
 
     return 0;
 }
-
-
