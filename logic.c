@@ -14,7 +14,7 @@
 #include <termios.h>
 #include <ctype.h>
 
-typedef enum e_token_type
+typedef enum e_token_type                       //enum to make token types easier to work with
 {
     TOK_WORD,
     TOK_PIPE,
@@ -24,14 +24,27 @@ typedef enum e_token_type
     TOK_BACKGROUND
 } t_token_type;
 
-typedef struct s_token
+typedef struct s_token                          //struct used for tokens
 {
     t_token_type type;
     char *value;
     struct s_token *next;
 } t_token;
 
-t_token *new_token(t_token_type type, char *value)
+typedef struct s_cmd                            //a linked list 
+{
+    char **argv;                                //array of argument
+    char *infile;                               //file we are taking input from
+    char *outfile;                              //file we are putting output
+    int append;                                 //tells you to either append i case of >> << or to rewrite incase of > < 
+    int background;                             // to show if we must send a process to background or foreground
+    struct s_cmd *next;                         //pointer to the next member of the linked list 
+                                                //no argc to decrease weight of struct objects
+
+
+} t_cmd;
+
+t_token *new_token(t_token_type type, char *value)              //function that make a new token object
 {
     t_token *tok = malloc(sizeof(t_token));
     if (!tok)
@@ -43,7 +56,7 @@ t_token *new_token(t_token_type type, char *value)
     return tok;
 }
 
-void add_token(t_token **head, t_token *newt)
+void add_token(t_token **head, t_token *newt)                   //function that addws particular token
 {
     t_token *tmp;
 
@@ -176,6 +189,129 @@ void free_tokens(t_token *t)
         t = n;
     }
 }
+
+t_cmd  * new_cmd()              //create new cmd object fill all respective needed members
+{
+        t_cmd *tmp = malloc(sizeof(t_cmd));
+        if(!tmp)
+        {
+            return NULL;
+        }
+    
+    tmp->argv = NULL;
+    tmp->infile = NULL;
+    tmp->outfile = NULL;
+    tmp->append = 0;
+    tmp->background = 0;
+    tmp->next = NULL;
+
+    return tmp;
+}
+    
+void add_list(t_cmd ** head , t_cmd ** new )            //creates a new member to the list , links it
+{
+    t_cmd *tmp;
+    
+    if(!*head);
+    {
+        *head = new;
+        return;
+    }
+    tmp = * head;
+    while ( tmp -> next)
+    {
+        tmp = tmp->next;
+    }
+    tmp->next = new;
+}
+
+void add_arg(t_cmd *cmd, char *word)                    // basicaly the c equivilant of .push in js but works only for our argv adding new members ton it
+{
+    int i = 0;
+    char **new_argv;
+
+    if (!cmd->argv)
+    {
+        new_argv = malloc(sizeof(char *) * 2);
+        new_argv[0] = strdup(word);
+        new_argv[1] = NULL;
+        cmd->argv = new_argv;
+        return;
+    }
+
+    while (cmd->argv[i])
+        i++;
+
+    new_argv = malloc(sizeof(char *) * (i + 2));
+    for (int j = 0; j < i; j++)
+        new_argv[j] = cmd->argv[j];
+
+    new_argv[i] = strdup(word);
+    new_argv[i + 1] = NULL;
+
+    free(cmd->argv);
+    cmd->argv = new_argv;
+}
+
+t_cmd *parse_tokens(t_token *tokens)                    // the heart of parsing this is what takes care of infile, outfile pushing into argv
+{
+    t_cmd *cmds = NULL;
+    t_cmd *current = new_cmd();
+
+    while (tokens)
+    {
+        if (tokens->type == TOK_WORD)
+        {
+            add_arg(current, tokens->value);
+        }
+        else if (tokens->type == TOK_REDIR_IN)
+        {
+            tokens = tokens->next;
+            if (tokens && tokens->type == TOK_WORD)
+                current->infile = strdup(tokens->value);
+        }
+        else if (tokens->type == TOK_REDIR_OUT)
+        {
+            tokens = tokens->next;
+            if (tokens && tokens->type == TOK_WORD)
+            {
+                current->outfile = strdup(tokens->value);
+                current->append = 0;
+            }
+        }
+        else if (tokens->type == TOK_REDIR_APPEND)
+        {
+            tokens = tokens->next;
+            if (tokens && tokens->type == TOK_WORD)
+            {
+                current->outfile = strdup(tokens->value);
+                current->append = 1;
+            }
+        }
+        else if (tokens->type == TOK_PIPE)
+        {
+            add_cmd(&cmds, current);
+            current = new_cmd();
+        }
+        else if (tokens->type == TOK_BACKGROUND)
+        {
+            current->background = 1;
+        }
+
+        tokens = tokens->next;
+    }
+
+    add_cmd(&cmds, current);
+    return cmds;
+}
+
+
+
+
+
+
+
+
 
 int main()
 {
