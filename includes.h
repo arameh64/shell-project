@@ -1,5 +1,5 @@
-#ifndef SHELL_H
-#define SHELL_H
+#ifndef INCLUDES_H
+#define INCLUDES_H
 
 #define _GNU_SOURCE
 
