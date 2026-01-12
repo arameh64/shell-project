@@ -8,6 +8,8 @@
 #include <unistd.h>
 #include <string.h>
 
+extern char **environ;
+
 typedef enum e_token_type
 {
     TOK_WORD,

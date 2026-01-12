@@ -107,6 +107,79 @@ void add_history(t_history **head, char *line)
     tmp->next = new;
 }
 
+int builtin_history(t_history *history)
+{
+    int i = 1;
+    while (history)
+    {
+        printf("%d  %s\n", i++, history->cmd);
+        history = history->next;
+    }
+    return 0;
+}
 
+int builtin_env()
+{
+      int i = 0;
 
+    while (environ[i])
+    {
+        printf("%s\n", environ[i]);
+        i++;
+    }
 
+    return 0;
+}
+
+int builtin_export(char **argv)
+{
+    int i = 1;
+
+    if (!argv[1])
+    {
+        fprintf(stderr, "export: missing argument\n");
+        return 1;
+    }
+
+    while (argv[i])
+    {
+        char *eq = strchr(argv[i], '=');
+
+        if (!eq)
+        {
+            fprintf(stderr, "export: invalid format: %s\n", argv[i]);
+            i++;
+            continue;
+        }
+
+        *eq = '\0';                 // split
+        char *key = argv[i];
+        char *value = eq + 1;
+
+        setenv(key, value, 1);
+
+        *eq = '=';                  // restore (important)
+        i++;
+    }
+
+    return 0;
+}
+
+int builtin_unset(char **argv)
+{
+    int i = 1;
+
+    if (!argv[1])
+    {
+        fprintf(stderr, "unset: missing argument\n");
+        return 1;
+    }
+
+    while (argv[i])
+    {
+        unsetenv(argv[i]);
+        i++;
+    }
+
+    return 0;
+}
