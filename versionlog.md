@@ -5,3 +5,5 @@
 1.0.0 added built in commands
 1.1.0 added the rest of the builtings
 1.1.1 bugfixes
+1.1.2 bugfixes
+1.2.0 all built in commands are implemented 
