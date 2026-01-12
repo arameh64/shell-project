@@ -35,6 +35,13 @@ typedef struct s_cmd
     struct s_cmd *next;
 } t_cmd;
 
+
+typedef struct s_history
+{
+    char *cmd;
+    struct s_history *next;
+} t_history;
+
 char    *reader();
 
 t_token *new_token(t_token_type type, char *value);
@@ -47,5 +54,6 @@ t_cmd   *new_cmd();
 void    add_cmd(t_cmd **head, t_cmd *newc);
 void    add_arg(t_cmd *cmd, char *word);
 t_cmd   *parse_tokens(t_token *tokens);
+
 
 #endif
