@@ -1,18 +1,41 @@
 #include "includes.h"
 
-int main()
+int main(void)
 {
-    char *raw = reader();
-    if (!raw)
-        return 0;
+    char        *raw;
+    t_token     *toks;
+    t_cmd       *cmds;
+    t_history   *history = NULL;
 
-    t_token *toks = tokenize(raw);
-    print_tokens(toks);
+    while (1)
+    {
+        raw = reader();
+        if (!raw)
+            break;
 
-    t_cmd *cmds = parse_tokens(toks);
-    (void)cmds;
+        add_history(&history, raw);
 
-    free_tokens(toks);
-    free(raw);
+        toks = tokenize(raw);
+        if (!toks)
+        {
+            free(raw);
+            continue;
+        }
+
+        cmds = parse_tokens(toks);
+        if (!cmds)
+        {
+            free_tokens(toks);
+            free(raw);
+            continue;
+        }
+
+        execute_commands(cmds, &history);   // <-- this is your dispatcher
+
+        free_cmds(cmds);
+        free_tokens(toks);
+        free(raw);
+    }
+
     return 0;
 }

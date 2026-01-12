@@ -3,7 +3,7 @@
 
 int builtin_pwd(void)
 {
-    char buf;
+    char buf[4096];
     
     if(getcwd(buf , sizeof(buf)) == NULL)
     {
@@ -42,7 +42,7 @@ int builtin_cd(char **argv)
 
     if (!target)
     {
-        fprintf(2 , "cd: target not set\n");
+        fprintf(stderr , "cd: target not set\n");
     }
 }
 
@@ -58,7 +58,7 @@ int builtin_exit( char ** argv )
     int status = 0;
     if(argv[1])
     {
-        status = argv[1];
+        status = atoi(argv[1]);    
     }
     
     exit(status);

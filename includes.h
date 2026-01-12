@@ -10,6 +10,13 @@
 
 extern char **environ;
 
+
+typedef struct s_history
+{
+    char *cmd;
+    struct s_history *next;
+} t_history;
+
 typedef enum e_token_type
 {
     TOK_WORD,
@@ -37,12 +44,12 @@ typedef struct s_cmd
     struct s_cmd *next;
 } t_cmd;
 
+void add_history(t_history **head, char *line);
 
-typedef struct s_history
-{
-    char *cmd;
-    struct s_history *next;
-} t_history;
+void execute_commands(t_cmd *cmds, t_history **history);
+
+void free_cmds(t_cmd *cmds);
+
 
 char    *reader();
 
