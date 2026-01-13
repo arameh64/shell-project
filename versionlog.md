@@ -10,3 +10,4 @@
 2.0.0 working pipes and redirections
 2.0.1 debug compoiler
 2.0.2 debug linker
+3.1.0 bugless redirection and pipes

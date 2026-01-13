@@ -80,6 +80,7 @@ void execute_commands(t_cmd *cmds, t_history **history);
 void execute_single(t_cmd *cmd, t_history **history);
 void execute_pipeline(t_cmd *cmds, t_history **history);
 void handle_redirections(t_cmd *cmd);
+int externals(char **argv);
 
 
 // ===== BUILTINS =====
