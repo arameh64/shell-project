@@ -132,6 +132,12 @@ void run_builtin(t_cmd *cmd, t_history **history)
         builtin_unset(cmd->argv);
 }
 
+int externals(char **argv)
+{
+    execve(argv[0], argv, environ);
+    perror(argv[0]);
+    return 1;
+}
 
 
 

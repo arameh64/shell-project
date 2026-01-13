@@ -12,6 +12,7 @@ int builtin_pwd(void)
     }
     
     printf("%s" , buf);
+    printf("\n");
 return 0;    
 }
 

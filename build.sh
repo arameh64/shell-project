@@ -4,5 +4,5 @@ set -e
 
 echo "Compiling Ashell..."
 
-gcc *.c -o Ashell
+gcc -Wall -Wextra -Werror *.c -o Ashell
 echo "Done. Binary: ./Ashell"
