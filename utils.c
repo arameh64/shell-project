@@ -1,52 +1,5 @@
 #include "includes.h"
 
-void execute_commands(t_cmd *cmds, t_history **history)
-{
-while (cmds)
-{
-        char **argv = cmds->argv;
-    
-        if (!argv || !argv[0])
-        {
-            cmds = cmds->next;
-            continue;
-        }
-    
-        if (strcmp(argv[0], "cd") == 0)
-            builtin_cd(argv);
-        else if (strcmp(argv[0], "pwd") == 0)
-            builtin_pwd();
-        else if (strcmp(argv[0], "exit") == 0)
-            builtin_exit(argv);
-        else if (strcmp(argv[0], "echo") == 0)
-            builtin_echo(argv);
-        else if (strcmp(argv[0], "env") == 0)
-            builtin_env();
-        else if (strcmp(argv[0], "export") == 0)
-            builtin_export(argv);
-        else if (strcmp(argv[0], "unset") == 0)
-            builtin_unset(argv);
-        else if (strcmp(argv[0], "history") == 0)
-            builtin_history(*history);
-        else
-        {
-            // external command
-            pid_t pid = fork();
-    
-            if (pid == 0)
-            {
-                execvp(argv[0], argv);
-                perror("exec");
-                exit(1);
-            }
-            else
-                waitpid(pid, NULL, 0);
-        }
-    
-        cmds = cmds->next;
-    }
-}
-
 void free_cmds(t_cmd *cmds)
 {
     int i;
@@ -80,7 +33,6 @@ void free_cmds(t_cmd *cmds)
         cmds = next;
     }
 }
-
 
 void print_tokens(t_token *t)
 {

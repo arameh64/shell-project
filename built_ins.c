@@ -19,7 +19,6 @@ int builtin_cd(char **argv)
 {
     char *target;
     char oldpwd[4096];
-    char newpwd[4096];
 
     if (getcwd(oldpwd, sizeof(oldpwd)) == NULL)
     {
@@ -44,6 +43,8 @@ int builtin_cd(char **argv)
     {
         fprintf(stderr , "cd: target not set\n");
     }
+    
+    return 0;
 }
 
 int builtin_clear(void)
@@ -52,16 +53,10 @@ int builtin_clear(void)
     return 0;
 }
 
-int builtin_exit( char ** argv )
-
+int builtin_exit(t_history **history)
 {
-    int status = 0;
-    if(argv[1])
-    {
-        status = atoi(argv[1]);    
-    }
-    
-    exit(status);
+    (void)history;
+    exit(0);
 }
 
 int builtin_echo(char **argv)
@@ -180,6 +175,31 @@ int builtin_unset(char **argv)
         unsetenv(argv[i]);
         i++;
     }
+
+    return 0;
+}
+
+int is_builtin(char *cmd)
+{
+    if (!cmd)
+        return 0;
+
+    if (strcmp(cmd, "cd") == 0)
+        return 1;
+    if (strcmp(cmd, "echo") == 0)
+        return 1;
+    if (strcmp(cmd, "pwd") == 0)
+        return 1;
+    if (strcmp(cmd, "exit") == 0)
+        return 1;
+    if (strcmp(cmd, "env") == 0)
+        return 1;
+    if (strcmp(cmd, "export") == 0)
+        return 1;
+    if (strcmp(cmd, "unset") == 0)
+        return 1;
+    if (strcmp(cmd, "history") == 0)
+        return 1;
 
     return 0;
 }
