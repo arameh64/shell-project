@@ -11,6 +11,7 @@
 #include <fcntl.h>
 #include <sys/wait.h>
 #include <sys/types.h>
+#include <linux/limits.h>
 
 // ===== GLOBALS =====
 extern char **environ;
