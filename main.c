@@ -13,7 +13,8 @@ int main(void)
         if (!raw)
             break;
 
-        add_history(&history, raw);
+        if (*raw)
+            add_history(&history, raw);
 
         toks = tokenize(raw);
         if (!toks)
@@ -30,7 +31,7 @@ int main(void)
             continue;
         }
 
-        execute_commands(cmds, &history);   // <-- this is your dispatcher
+        execute_commands(cmds, &history);
 
         free_cmds(cmds);
         free_tokens(toks);

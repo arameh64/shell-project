@@ -7,3 +7,4 @@
 1.1.1 bugfixes
 1.1.2 bugfixes
 1.2.0 all built in commands are implemented 
+2.0.0 working pipes and redirections
