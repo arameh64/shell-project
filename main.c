@@ -7,6 +7,8 @@ int main(void)
     t_cmd       *cmds;
     t_history   *history = NULL;
 
+    load_rc(&history);   // runs config file
+    
     while (1)
     {
         raw = reader();

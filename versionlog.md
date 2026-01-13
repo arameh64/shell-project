@@ -12,3 +12,4 @@
 2.0.2 debug linker
 3.1.0 bugless redirection and pipes
 3.1.1 config file functions
+3.1.1 config file bugless

@@ -1,10 +1,15 @@
 #include "includes.h"
  
+//      config file path    =      ~/.ashrc
+
 void load_rc(t_history ** history)
 {
+    printf("DEBUG: loading rc file\n");
+    
     char path[PATH_MAX];
     snprintf(path, sizeof(path), "%s/.ashrc", getenv("HOME"));
-
+    printf("DEBUG: rc path = %s\n", path);
+    
     FILE *f = fopen(path, "r");
     if (!f)
         return;

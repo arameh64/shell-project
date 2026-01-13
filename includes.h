@@ -105,4 +105,9 @@ void free_cmds(t_cmd *cmds);
 void print_tokens(t_token *t);
 void free_tokens(t_token *t);
 
+// ===== CONFIG FILE =====
+void load_rc(t_history ** history);
+void process_line(char *raw, t_history **history);
+
+
 #endif
