@@ -13,3 +13,4 @@
 3.1.0 bugless redirection and pipes
 3.1.1 config file functions
 3.1.1 config file bugless
+3.1.2 cleanup
