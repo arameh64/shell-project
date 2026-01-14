@@ -34,6 +34,8 @@ int builtin_cd(char **argv)
     else if (strcmp(argv[1], "-") == 0)
     {
         target = getenv("OLDPWD");
+        if (target)
+            printf("%s\n", target); 
     }
     else
     {
@@ -42,9 +44,22 @@ int builtin_cd(char **argv)
 
     if (!target)
     {
-        fprintf(stderr , "cd: target not set\n");
+        fprintf(stderr, "cd: target not set\n");
+        return 1;
     }
-    
+
+    if (chdir(target) != 0)
+    {
+        perror("cd");
+        return 1;
+    }
+
+    setenv("OLDPWD", oldpwd, 1);
+
+    char cwd[4096];
+    if (getcwd(cwd, sizeof(cwd)) != NULL)
+        setenv("PWD", cwd, 1);
+
     return 0;
 }
 

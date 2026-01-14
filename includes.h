@@ -2,6 +2,7 @@
 #define INCLUDES_H
 
 #define _GNU_SOURCE
+#define _POSIX_C_SOURCE 200809L
 
 // ===== SYSTEM INCLUDES =====
 #include <stdio.h>
@@ -11,8 +12,11 @@
 #include <fcntl.h>
 #include <sys/wait.h>
 #include <sys/types.h>
-#include <linux/limits.h>
+#include <limits.h>
 #include <ctype.h>
+#include <termios.h>
+#include <signal.h>
+
 
 // ===== GLOBALS =====
 extern char **environ;
@@ -53,6 +57,7 @@ typedef struct s_cmd
     struct s_cmd *next;
 } t_cmd;
 
+extern struct termios orig_termios;
 
 // ===== HISTORY =====
 void add_history(t_history **head, char *line);
