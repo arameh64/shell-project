@@ -1,13 +1,22 @@
 #include "includes.h"
-\
+
+t_history *history_tail(t_history *h)
+{
+    if (!h)
+        return NULL;
+    while (h->next)
+        h = h->next;
+    return h;
+}
+
 char *reader(t_history **history)
 {
-    static t_history *hist_cursor = NULL;
+    t_history *cursor = NULL;   // NULL = empty prompt
     char buffer[4096];
     int len = 0;
     char c;
 
-    hist_cursor = *history;
+    buffer[0] = 0;
 
     write(1, "ashell> ", 8);
 
@@ -29,6 +38,7 @@ char *reader(t_history **history)
             if (len > 0)
             {
                 len--;
+                buffer[len] = 0;
                 write(1, "\b \b", 3);
             }
             continue;
@@ -41,34 +51,50 @@ char *reader(t_history **history)
             if (read(STDIN_FILENO, &seq[0], 1) != 1) continue;
             if (read(STDIN_FILENO, &seq[1], 1) != 1) continue;
 
-            if (seq[0] == '[' && seq[1] == 'A') // UP
+            // recompute tail every time (important)
+            t_history *tail = history_tail(*history);
+
+            // UP ARROW
+            if (seq[0] == '[' && seq[1] == 'A')
             {
-                if (hist_cursor && hist_cursor->next)
-                    hist_cursor = hist_cursor->next;
+                if (!tail)
+                    continue;
+
+                if (cursor == NULL)
+                    cursor = tail;          // first UP -> last command
+                else if (cursor->prev)
+                    cursor = cursor->prev; // go back in history
 
                 write(1, "\r\033[K", 4);
                 write(1, "ashell> ", 8);
 
-                if (hist_cursor)
+                strncpy(buffer, cursor->cmd, sizeof(buffer) - 1);
+                buffer[sizeof(buffer) - 1] = 0;
+                len = (int)strlen(buffer);
+                write(1, buffer, len);
+            }
+            // DOWN ARROW
+            else if (seq[0] == '[' && seq[1] == 'B')
+            {
+                if (cursor && cursor->next)
+                    cursor = cursor->next;
+                else
+                    cursor = NULL; // back to empty prompt
+
+                write(1, "\r\033[K", 4);
+                write(1, "ashell> ", 8);
+
+                if (cursor)
                 {
-                    strcpy(buffer, hist_cursor->cmd);
-                    len = strlen(buffer);
+                    strncpy(buffer, cursor->cmd, sizeof(buffer) - 1);
+                    buffer[sizeof(buffer) - 1] = 0;
+                    len = (int)strlen(buffer);
                     write(1, buffer, len);
                 }
-            }
-            else if (seq[0] == '[' && seq[1] == 'B') // DOWN
-            {
-                if (hist_cursor && hist_cursor->prev)
-                    hist_cursor = hist_cursor->prev;
-
-                write(1, "\r\033[K", 4);
-                write(1, "ashell> ", 8);
-
-                if (hist_cursor)
+                else
                 {
-                    strcpy(buffer, hist_cursor->cmd);
-                    len = strlen(buffer);
-                    write(1, buffer, len);
+                    len = 0;
+                    buffer[0] = 0;
                 }
             }
 
@@ -76,10 +102,18 @@ char *reader(t_history **history)
         }
 
         // normal character
-        buffer[len++] = c;
-        write(1, &c, 1);
+        if (len < (int)sizeof(buffer) - 1)
+        {
+            buffer[len++] = c;
+            buffer[len] = 0;
+            write(1, &c, 1);
+            cursor = NULL; // typing resets history navigation
+        }
     }
 
-    buffer[len] = '\0';
     return strdup(buffer);
 }
+
+
+
+

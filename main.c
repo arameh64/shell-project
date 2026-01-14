@@ -13,7 +13,7 @@ int main(void)
     
     while (1)
     {
-        raw = reader();
+        raw = reader(&history);
         if (!raw)
             break;
 

@@ -17,3 +17,7 @@ void enable_raw_mode(void)
 
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
 }
+
+
+
+

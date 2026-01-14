@@ -2,25 +2,30 @@
  
 //      config file path    =      ~/.ashrc
 
-void load_rc(t_history ** history)
+void load_rc(t_history **history)
 {
-    
     char path[PATH_MAX];
-    snprintf(path, sizeof(path), "%s/.ashrc", getenv("HOME"));
-    
-    FILE *f = fopen(path, "r");
-    if (!f)
-        return;
-
+    char *home = getenv("HOME");
+    FILE *f;
     char *line = NULL;
     size_t len = 0;
 
+    if (!home)
+        return;
+
+    snprintf(path, sizeof(path), "%s/.ashrc", home);
+
+    f = fopen(path, "r");
+    if (!f)
+        return;
+
     while (getline(&line, &len, f) != -1)
     {
+        // ignore empty/comment lines
         if (line[0] == '\n' || line[0] == '#')
             continue;
 
-        process_line(line, history); // same pipeline as main loop
+        process_line(line, history);
     }
 
     free(line);
@@ -32,8 +37,18 @@ void process_line(char *raw, t_history **history)
     t_token *toks;
     t_cmd   *cmds;
 
-    if (*raw)
-        add_history(history, raw);
+    if (!raw)
+        return;
+
+    // strip newline from getline() inputs (rc file + any other sources)
+    raw[strcspn(raw, "\n")] = 0;
+
+    // skip empty lines
+    if (!*raw)
+        return;
+
+    // add to history safely (add_history does strdup)
+    add_history(history, raw);
 
     toks = tokenize(raw);
     if (!toks)

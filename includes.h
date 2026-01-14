@@ -65,8 +65,7 @@ void add_history(t_history **head, char *line);
 void print_history(t_history *history);
 
 // ===== READER =====
-char *reader();
-
+char *reader(t_history **history);
 
 // ===== LEXER / TOKENIZER =====
 t_token *new_token(t_token_type type, char *value);

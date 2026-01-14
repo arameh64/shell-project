@@ -102,8 +102,24 @@ int builtin_echo(char **argv)
 
 void add_history(t_history **head, char *line)
 {
-    t_history *new = malloc(sizeof(t_history));
+    t_history *new;
+    t_history *tail;
+
+    if (!head || !line || !*line)
+        return;
+
+    new = malloc(sizeof(t_history));
+    if (!new)
+        return;
+
     new->cmd = strdup(line);
+    if (!new->cmd)
+    {
+        free(new);
+        return;
+    }
+
+    new->prev = NULL;
     new->next = NULL;
 
     if (!*head)
@@ -112,10 +128,12 @@ void add_history(t_history **head, char *line)
         return;
     }
 
-    t_history *tmp = *head;
-    while (tmp->next)
-        tmp = tmp->next;
-    tmp->next = new;
+    tail = *head;
+    while (tail->next)
+        tail = tail->next;
+
+    tail->next = new;
+    new->prev = tail;
 }
 
 int builtin_history(t_history *history)

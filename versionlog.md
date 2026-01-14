@@ -16,4 +16,5 @@
 3.1.2 cleanup
 3.2.0 $expansion
 3.2.1 arrow browsing start(linker problems)
-3.2.2 implementation of rawmode
+3.2.3 implementation of rawmode
+4.0.0 final 
