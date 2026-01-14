@@ -1,6 +1,7 @@
 #include"includes.h"
 int g_last_status = 0;
 
+struct termios orig_termios;
 
 void execute_commands(t_cmd *cmds, t_history **history)
 {

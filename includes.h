@@ -27,6 +27,7 @@ extern int g_last_status;
 typedef struct s_history
 {
     char *cmd;
+    struct s_history *prev;
     struct s_history *next;
 } t_history;
 
@@ -119,5 +120,7 @@ void process_line(char *raw, t_history **history);
 // ===== EXPANSIONS =======
 char *expand_var(char *str);
 void expand_cmd_vars(t_cmd *cmd);
+
+void enable_raw_mode(void);
 
 #endif

@@ -9,6 +9,8 @@ int main(void)
 
     load_rc(&history);   // runs config file
     
+    enable_raw_mode();
+    
     while (1)
     {
         raw = reader();
