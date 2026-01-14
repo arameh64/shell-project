@@ -128,7 +128,7 @@ External Commands
 External commands are executed using:
 
 execvp(argv[0], argv);
-
+```
 This provides standard PATH resolution and behavior consistent with typical Unix shells.
 Notes
 
