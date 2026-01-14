@@ -79,7 +79,7 @@ int builtin_echo(char **argv)
         i++;
     }
 
-    if (newline)
+    if (newline==0)
         printf("\n");
 
     return 0;

@@ -12,9 +12,11 @@
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <linux/limits.h>
+#include <ctype.h>
 
 // ===== GLOBALS =====
 extern char **environ;
+extern int g_last_status;
 
 // ===== STRUCTS & ENUMS =====
 
@@ -109,5 +111,8 @@ void free_tokens(t_token *t);
 void load_rc(t_history ** history);
 void process_line(char *raw, t_history **history);
 
+// ===== EXPANSIONS =======
+char *expand_var(char *str);
+void expand_cmd_vars(t_cmd *cmd);
 
 #endif

@@ -33,6 +33,8 @@ int main(void)
             continue;
         }
 
+        expand_cmd_vars(cmds);
+        
         execute_commands(cmds, &history);
 
         free_cmds(cmds);

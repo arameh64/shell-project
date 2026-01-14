@@ -14,3 +14,4 @@
 3.1.1 config file functions
 3.1.1 config file bugless
 3.1.2 cleanup
+3.2.0 $expansion

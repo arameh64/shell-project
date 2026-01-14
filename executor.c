@@ -1,4 +1,6 @@
 #include"includes.h"
+int g_last_status = 0;
+
 
 void execute_commands(t_cmd *cmds, t_history **history)
 {
@@ -28,7 +30,14 @@ void execute_single(t_cmd *cmd, t_history **history)
         externals(cmd->argv);   // YOUR function
         exit(1);
     }
-    waitpid(pid, NULL, 0);
+    
+    int status;
+    waitpid(pid, &status, 0);
+
+    if (WIFEXITED(status))
+    g_last_status = WEXITSTATUS(status);
+    else if (WIFSIGNALED(status))
+    g_last_status = 128 + WTERMSIG(status);
 }
 
 void execute_pipeline(t_cmd *cmds, t_history **history)
@@ -36,6 +45,7 @@ void execute_pipeline(t_cmd *cmds, t_history **history)
     int fd[2];
     int prev_fd = -1;
     pid_t pid;
+    int status;
     t_cmd *cmd = cmds;
 
     while (cmd)
@@ -45,14 +55,12 @@ void execute_pipeline(t_cmd *cmds, t_history **history)
         pid = fork();
         if (pid == 0)
         {
-            // if not first command, read from previous pipe
             if (prev_fd != -1)
             {
                 dup2(prev_fd, STDIN_FILENO);
                 close(prev_fd);
             }
 
-            // if not last command, write to next pipe
             if (cmd->next)
                 dup2(fd[1], STDOUT_FILENO);
 
@@ -78,7 +86,14 @@ void execute_pipeline(t_cmd *cmds, t_history **history)
         cmd = cmd->next;
     }
 
-    while (wait(NULL) > 0);
+    // wait for all children, last wait sets g_last_status
+    while (waitpid(-1, &status, 0) > 0)
+    {
+        if (WIFEXITED(status))
+            g_last_status = WEXITSTATUS(status);
+        else if (WIFSIGNALED(status))
+            g_last_status = 128 + WTERMSIG(status);
+    }
 }
 
 void handle_redirections(t_cmd *cmd)
@@ -132,6 +147,87 @@ void run_builtin(t_cmd *cmd, t_history **history)
         builtin_unset(cmd->argv);
 }
 
+char *expand_var(char *str)
+{
+    int i = 0;
 
+    while (str[i] && str[i] != '$')
+        i++;
+
+    if (!str[i])
+        return strdup(str);
+
+    // handle $?
+    if (str[i + 1] == '?')
+    {
+        char buf[32];
+        sprintf(buf, "%d", g_last_status);
+
+        char result[1024];
+        result[0] = 0;
+
+        strncat(result, str, i);
+        strcat(result, buf);
+        strcat(result, str + i + 2);
+
+        return strdup(result);
+    }
+
+    // handle $$
+    if (str[i + 1] == '$')
+    {
+        char buf[32];
+        sprintf(buf, "%d", getpid());
+
+        char result[1024];
+        result[0] = 0;
+
+        strncat(result, str, i);
+        strcat(result, buf);
+        strcat(result, str + i + 2);
+
+        return strdup(result);
+    }
+
+    // normal env var
+    int start = i + 1;
+    int len = 0;
+
+    while (str[start + len] && (isalnum(str[start + len]) || str[start + len] == '_'))
+        len++;
+
+    char var[256];
+    strncpy(var, str + start, len);
+    var[len] = 0;
+
+    char *val = getenv(var);
+    if (!val)
+        val = "";
+
+    char result[1024];
+    result[0] = 0;
+
+    strncat(result, str, i);
+    strcat(result, val);
+    strcat(result, str + start + len);
+
+    return strdup(result);
+}
+
+void expand_cmd_vars(t_cmd *cmd)
+{
+    int i = 0;
+
+    while (cmd->argv[i])
+    {
+        if (strchr(cmd->argv[i], '$'))
+        {
+            char *new = expand_var(cmd->argv[i]);
+            free(cmd->argv[i]);
+            cmd->argv[i] = new;
+        }
+        i++;
+    }
+}
 
 
