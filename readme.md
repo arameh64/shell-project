@@ -38,14 +38,23 @@ The project is structured to reflect real shell architecture: input reading, tok
 
 .
 ├── main.c
+
 ├── reader.c
+
 ├── tokenizer.c
+
 ├── parser.c
+
 ├── executor.c
+
 ├── built_ins.c
+
 ├── externals.c
+
 ├── utils.c
+
 ├── includes.h
+
 └── build.sh
 
 
